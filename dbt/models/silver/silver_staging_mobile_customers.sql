@@ -108,6 +108,46 @@ cleaned as (
     from source
 ),
 
+country_correction as (
+    select  
+        customer_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        age,
+        city,
+        operator,
+        plan_type,
+        monthly_data_gb,
+        monthly_bill_usd,
+        registration_date,
+        status,
+        device_brand,
+        device_model,
+        contracted_services,
+        record_uuid,
+        last_payment_date,
+        credit_limit,
+        data_usage_current_month,
+        latitude,
+        longitude,
+        credit_score,
+        ingestion_timestamp,
+        payment_history,
+        transformation_timestamp,  
+        case
+            when lower(trim(city)) in ('barranquilla', 'medellin', 'bogota','cali') then 'colombia'
+            when lower(trim(city)) in ('rosario', 'cordoba', 'buenos aires') then 'argentina'
+            when lower(trim(city)) in ('santiago', 'valparaiso','concepcion') then 'chile'
+            when lower(trim(city)) in ('ciudad de mexico', 'guadalajara') then 'mexico'
+            when lower(trim(city)) in ('lima', 'arequipa','trujillo') then 'peru'
+            when trim(city) = '' or city is null then null
+            else lower(trim(country))
+        end as country
+    from cleaned
+),
+
 fingerprinted as (
     select *,
         -- Fingerprint: clave para identificar registros iguales
@@ -116,7 +156,7 @@ fingerprinted as (
         lower(trim(coalesce(email, ''))) || '_' ||
         lower(trim(coalesce(operator, ''))) || '_' ||
         lower(trim(coalesce(country, ''))) as fingerprint
-    from cleaned
+    from country_correction
 ),
 
 with_ids as (
