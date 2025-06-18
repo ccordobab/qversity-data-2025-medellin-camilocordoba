@@ -1,4 +1,4 @@
-CREATE EXTENSION fuzzystrmatch;
+{{ config(materialized='table') }}
 
 with source as (
     select * from {{ ref('bronze_raw_mobile_customers') }}
@@ -11,7 +11,10 @@ cleaned as (
         initcap(trim(last_name)) as last_name,
         lower(trim(email)) as email,
         trim(phone_number) as phone_number,
-        cast(age as integer) as age,
+        case
+            when cast(age as integer) between 18 and 110 then cast(age as integer)
+            else null
+        end as age,
 
         case
             when difference(lower(trim(country)), 'peru') >= 3 then 'peru'
@@ -36,7 +39,7 @@ cleaned as (
             when difference(lower(trim(city)), 'santiago') >= 3 then 'santiago'
             when difference(lower(trim(city)), 'valparaiso') >= 3 then 'valparaiso'
             when difference(lower(trim(city)), 'concepcion') >= 3 then 'concepcion'
-            when difference(lower(trim(city)), 'cordoba') >= 3 then 'cordoba'
+            when difference(lower(trim(city)), 'cordoba') >= 2 then 'cordoba'
             when difference(lower(trim(city)), 'buenos aires') >= 3 then 'buenos aires'
             when difference(lower(trim(city)), 'barranquilla') >= 3 then 'barranquilla'
             else lower(trim(city))
@@ -46,20 +49,33 @@ cleaned as (
             when difference(lower(trim(operator)), 'wom') >= 3 then 'wom'
             when difference(lower(trim(operator)), 'claro') >= 3 then 'claro'
             when difference(lower(trim(operator)), 'tigo') >= 3 then 'tigo'
-            when difference(lower(trim(operator)), 'movistar') >= 3 then 'movistar'
+            when difference(lower(trim(operator)), 'movistar') >= 2 then 'movistar'
             else lower(trim(operator))
         end as operator,
 
         case
-            when difference(lower(trim(plan_type)), 'prepago') >= 3 then 'prepago'
-            when difference(lower(trim(plan_type)), 'pospago') >= 3 then 'pospago'
-            when difference(lower(trim(plan_type)), 'control') >= 3 then 'control'
+            when difference(lower(trim(plan_type)), 'prepago') >= 2 then 'prepago'
+            when difference(lower(trim(plan_type)), 'pospago') >= 2 then 'pospago'
+            when difference(lower(trim(plan_type)), 'control') >= 2 then 'control'
+            when difference(lower(trim(plan_type)), 'ctrl') >= 2 then 'control'
             else lower(trim(plan_type))
         end as plan_type,
 
         cast(monthly_data_gb as numeric) as monthly_data_gb,
         cast(monthly_bill_usd as numeric) as monthly_bill_usd,
-        to_date(registration_date, 'YYYY-MM-DD') as registration_date,
+        case
+            when registration_date ~ '^\d{4}-\d{2}-\d{2}$' then to_date(registration_date, 'YYYY-MM-DD')
+            when registration_date ~ '^\d{8}$' then to_date(registration_date, 'YYYYMMDD')
+            when registration_date ~ '^\d{4}-\d{2}-\d{2}T' then to_date(left(registration_date, 10), 'YYYY-MM-DD')
+            when registration_date ~ '^\d{2}-\d{2}-\d{4}$' then 
+            case 
+                when split_part(registration_date, '-', 1)::int > 12 then to_date(registration_date, 'DD-MM-YYYY')
+                when split_part(registration_date, '-', 2)::int > 12 then to_date(registration_date, 'MM-DD-YYYY')
+                else to_date(registration_date, 'DD-MM-YYYY')
+            end
+            else null
+        end as registration_date,
+
 
         case
             when lower(trim(status)) in ('active', 'activo', 'válido') then 'activo'
@@ -89,9 +105,60 @@ cleaned as (
         ingestion_timestamp,
         payment_history,
         current_timestamp as transformation_timestamp
-
     from source
+),
+
+fingerprinted as (
+    select *,
+        -- Fingerprint: clave para identificar registros iguales
+        lower(trim(coalesce(first_name, ''))) || '_' ||
+        lower(trim(coalesce(last_name, ''))) || '_' ||
+        lower(trim(coalesce(email, ''))) || '_' ||
+        lower(trim(coalesce(operator, ''))) || '_' ||
+        lower(trim(coalesce(country, ''))) as fingerprint
+    from cleaned
+),
+
+with_ids as (
+    select *,
+        dense_rank() over (order by fingerprint) as customer_clean_id
+    from fingerprinted
+),
+
+deduplicated as (
+    select distinct on (customer_clean_id) *
+    from with_ids
+    order by customer_clean_id, ingestion_timestamp desc
 )
 
-select * from cleaned;
+select 
+    customer_clean_id,
+    customer_id as original_customer_id,
+    first_name,
+    last_name,
+    email,
+    phone_number,
+    age,
+    country,
+    city,
+    operator,
+    plan_type,
+    monthly_data_gb,
+    monthly_bill_usd,
+    registration_date,
+    status,
+    device_brand,
+    device_model,
+    contracted_services,
+    record_uuid,
+    last_payment_date,
+    credit_limit,
+    data_usage_current_month,
+    latitude,
+    longitude,
+    credit_score,
+    ingestion_timestamp,
+    payment_history,
+    transformation_timestamp
+from deduplicated
 
