@@ -78,9 +78,9 @@ cleaned as (
 
 
         case
-            when lower(trim(status)) in ('active', 'activo', 'válido') then 'activo'
-            when lower(trim(status)) in ('inactive', 'inactivo', 'invalid') then 'inactivo'
-            when lower(trim(status)) in ('suspended', 'suspendido') then 'suspendido'
+            when lower(trim(status)) in ('active', 'activo', 'válido') then 'active'
+            when lower(trim(status)) in ('inactive', 'inactivo', 'invalid') then 'inactive'
+            when lower(trim(status)) in ('suspended', 'suspendido') then 'suspended'
             when trim(status) = '' or status is null then null
             else lower(trim(status))
         end as status,
