@@ -18,6 +18,7 @@ joined_loc as (
         b.registration_date,
         b.status,
         b.credit_score,
+        b.operator,
         b.ingestion_timestamp,
         b.transformation_timestamp,
         b.city,
@@ -44,6 +45,7 @@ joined_device as (
         j.registration_date,
         j.status,
         j.credit_score,
+        j.operator,
         j.ingestion_timestamp,
         j.transformation_timestamp,
         j.location_id,
@@ -68,6 +70,7 @@ select
     registration_date,
     status,
     credit_score,
+    operator,
     ingestion_timestamp,
     transformation_timestamp
 from joined_device
