@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
 from datetime import datetime
 import os
 import requests
@@ -48,5 +49,15 @@ with DAG(
         python_callable = converting_json_to_table_with_timestamp,
     )
 
+    run_dbt_silver_task = BashOperator(
+        task_id="run_dbt_silver_models",
+        bash_command="docker exec qversity-dbt-1 dbt run --select silver",
+    )
 
-    bronze_raw_table_creation_task
+    run_dbt_gold_task = BashOperator(
+        task_id="run_dbt_gold_models",
+        bash_command="docker exec qversity-dbt-1 dbt run --select gold",
+    )
+
+    bronze_raw_table_creation_task >> run_dbt_silver_task
+    run_dbt_silver_task >> run_dbt_gold_task

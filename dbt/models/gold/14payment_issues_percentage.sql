@@ -23,5 +23,6 @@ counts as (
 select
     total_customers,
     customers_with_issues,
-    100.0 * customers_with_issues / nullif(total_customers, 0) as percentage_with_issues
+    100.0 * customers_with_issues / nullif(total_customers, 0) as percentage_with_issues,
+    current_timestamp as report_generated_at
 from counts

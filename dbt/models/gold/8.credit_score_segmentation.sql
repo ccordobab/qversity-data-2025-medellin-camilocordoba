@@ -8,7 +8,8 @@ select
         when credit_score < 850 then 'greater than 750'
         else 'Unknown'
     end as credit_segment,
-    count(*) as customer_count
+    count(*) as customer_count,
+    current_timestamp as report_generated_at
 from {{ ref('silver_customers') }}
 group by credit_segment
 order by customer_count desc

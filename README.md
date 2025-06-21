@@ -28,6 +28,31 @@ The dataset used is a messy JSON file stored in a public S3 bucket, containing i
 
 ## Quick Start
 
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ccordobab/qversity-data-2025-medellin-camilocordoba.git
+cd qversity-data-2025-medellin-camilocordoba
+
+### 2. Clone and setup environment:
+```bash
+# Copy environment template
+cp env.example .env
+
+### 3. Start Docker Containers
+
+This project uses docker-compose to run:
+
+- Airflow (orchestration)
+- PostgreSQL (database)
+- DBT (transformations)
+
+Start all containers:
+
+```bash
+docker compose up --build -d
+
 ### Requirements
 
 - Docker & Docker Compose
@@ -60,7 +85,6 @@ https://qversity-raw-public-data.s3.amazonaws.com/mobile_customers_messy_dataset
 Additionals
 - To promote clean code and reuse, a dedicated module utils.py was created to hold helper functions for data extraction and serialization.
 
-
 ---
 
 ### Silver Layer – Detailed Data Cleaning and Standardization
@@ -69,13 +93,12 @@ Additionals
 
 This model performs detailed cleaning and normalization of the raw mobile customer data ingested in the Bronze layer. The main purpose is to make the dataset ready for analytical use by removing inconsistencies, parsing formats, correcting typos, and enforcing data quality standards.
 
----
+
 
 ### Transformations and Rationales
 
 Each transformation addresses a real-world data inconsistency or usability challenge. Below is a breakdown of each cleaning step, why it was necessary, and how it was implemented.
 
----
 
 #### 1. Text Field Normalization
 - **What:** Standardize text fields such as names, emails, cities, countries.
@@ -297,15 +320,43 @@ In the raw data, each customer has a payment_history column with values like: "[
 4. **Explode into rows** Each customer’s history is a list of payments; we want one row per payment. so jsonb_array_elements(...)` is used to explode the array into multiple rows.
 
 ---
+## Gold Layer - aggregations
 
-### ✅ Benefits of These Transformations
+**How It Was Built**
+Each question was implemented in a dedicated dbt model within the gold/ folder, using SQL-based transformations that:
 
-- **Dimensional modeling:** Normalizes one-to-many relationships.
-- **Efficient storage:** Service groups avoid redundancy.
-- **Query power:** Enables slicing revenue and behavior by service types or combinations.
-- **Consistency:** Cleaned services allow for accurate counts, joins, and metrics.
+-Join tables from the Silver Layer
+-Aggregate or group data as needed 
+-Perform filtering and segmentation 
+-Include timestamp logic when temporal trends are analyzed
 
----
+This approach ensures separation of concerns, reusability, and clear lineage between analytical outputs and raw inputs.
+
+## Business Questions and Corresponding SQL Models
+
+Below are the key business questions answered in the Gold Layer, each linked to its corresponding dbt model:
+
+- [What is the average revenue per user (ARPU) by plan type?](gold/arpu_by_plan_type.sql)
+- [What is the revenue distribution by geographic location?](gold/revenue_by_location.sql)
+- [Which customer segments generate the highest revenue?](gold/revenue_by_age_segment.sql)
+- [What is the distribution of customers by location?](gold/customer_distribution_by_location.sql)
+- [What is the age distribution of customers by plan type?](gold/age_distribution_by_plan.sql)
+- [What is the age distribution by country and operator?](gold/age_distribution_by_country_operator.sql)
+- [How are customers distributed across different operators?](gold/distribution_by_operator.sql)
+- [What is customer segmentation by credit score ranges?](gold/credit_score_segmentation.sql)
+- [What are the most popular device brands?](gold/popular_device_brands.sql)
+- [What is device brand preference by country/operator?](gold/device_brand_preference_by_country_operator.sql)
+- [What is device brand preference by plan type?](gold/device_preference_by_plan_type.sql)
+- [Which services are most commonly contracted?](gold/popular_services.sql)
+- [What service combinations are most popular?](gold/popular_service_combinations.sql)
+- [What percentage of customers have payment issues?](gold/payment_issues_percentage.sql)
+- [Which customers have pending payments?](gold/customers_with_pending_payments.sql)
+- [How does credit score correlate with payment behavior?](gold/credit_score_payments_corelation.sql)
+- [How does the distribution of new customers change over time?](gold/new_customers_over_time.sql)
+- [What are customer acquisition trends by operator?](gold/customer_acquisition_by_operator.sql)
+- [What percentage of customers are active/suspended/inactive?](gold/customer_status_distribution.sql)
+- [Which service combinations drive highest revenue?](gold/highest_revenue_by_service_combination.sql)
+- [How do the mean and median monthly revenues per user compare across different plan types and operators?](gold/mean_median_revenue_comparison.sql)
 
 ---
 

@@ -122,7 +122,7 @@ cleaned as (
         cast(credit_score as integer) as credit_score,
         ingestion_timestamp,
         payment_history,
-        current_timestamp as transformation_timestamp
+        current_timestamp as processed_at
     from source
     where customer_id is not null
 ),
@@ -154,7 +154,7 @@ country_correction as (
         credit_score,
         ingestion_timestamp,
         payment_history,
-        transformation_timestamp,  
+        processed_at,  
         case
             when lower(trim(city)) in ('barranquilla', 'medellin', 'bogota','cali') then 'colombia'
             when lower(trim(city)) in ('rosario', 'cordoba', 'buenos aires') then 'argentina'
@@ -200,6 +200,6 @@ select
     credit_score,
     ingestion_timestamp,
     payment_history,
-    transformation_timestamp
+    processed_at
 from deduplicated
 

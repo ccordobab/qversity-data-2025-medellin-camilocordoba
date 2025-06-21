@@ -19,7 +19,7 @@ joined_loc as (
         b.credit_score,
         b.operator,
         b.ingestion_timestamp,
-        b.transformation_timestamp,
+        b.processed_at,
         b.city,
         b.country,
         b.device_brand,
@@ -51,7 +51,7 @@ joined_device as (
         j.credit_score,
         j.operator,
         j.ingestion_timestamp,
-        j.transformation_timestamp,
+        j.processed_at,
         j.location_id,
         j.monthly_data_gb,
         j.monthly_bill_usd,
@@ -87,6 +87,6 @@ select
     data_usage_current_month,
     plan_type,
     ingestion_timestamp,
-    transformation_timestamp
+    processed_at
 from joined_device
 
