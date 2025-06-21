@@ -2,13 +2,13 @@
 
 
 with all_customers as (
-    select distinct customer_clean_id
+    select distinct customer_id
     from {{ ref('silver_customers') }}
 ),
 
 
 issues as (
-    select distinct customer_clean_id
+    select distinct customer_id
     from {{ ref('silver_payment_history') }}
     where trim(lower(status)) not in ('paid', 'completed', 'success')
 ),

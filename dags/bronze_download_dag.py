@@ -10,22 +10,21 @@ from utils import serialize_json, json_from_api
 
 URL = "https://qversity-raw-public-data.s3.amazonaws.com/mobile_customers_messy_dataset.json"
 
-# la función definida en utils.py para descargar y convertir el JSON a un objeto de Python. quitandole la metadata del objeto response
+# function defined in utils.py to request the data from the S3 bucket and returning the data of the response object without the metadata
 json_data = json_from_api(URL)
 
-# Función principal que transforma el JSON a una tabla SQL con un timestamp de ingestión
+# transforms the json a postgreSQL table with a timestamp column added for the ingestion time
 def converting_json_to_table_with_timestamp():
 
-    # Convertimos el JSON a un DataFrame de pandas
+    # converts JSON file to a pandas DataFrame
     mobile_customer_dataframe = pd.DataFrame(json_data)
 
-    # La columna 'payment_history' contiene datos anidados (lista de diccionarios),
-    # por lo tanto la serializamos como string JSON para que pueda guardarse en SQL
+    # the 'payment_history' colummn contains nested data (dictionaries list), therefore it is serialized to JSON string so that it can be stored in a table
     mobile_customer_dataframe['payment_history'] = mobile_customer_dataframe['payment_history'].apply(serialize_json)
     mobile_customer_dataframe['ingestion_timestamp']= datetime.now()
     engine = create_engine("postgresql+psycopg2://qversity-admin:qversity-admin@postgres:5432/qversity")
 
-    # Exportamos el DataFrame a una tabla SQL
+    # exports the dataframe to an SQL table
     mobile_customer_dataframe.to_sql(
         name='bronze_mobile_customers',
         con=engine,
@@ -43,7 +42,7 @@ with DAG(
     tags=["medallion"],
 ) as dag:
 
-    # tarea que ejecuta la función de ingestión
+    # task to execute the ingestion from the json bucket to the postgreSQL bronze_mobile_customer_table
     bronze_raw_table_creation_task = PythonOperator(
         task_id = "bronze_raw_table_creation_from_json",
         python_callable = converting_json_to_table_with_timestamp,

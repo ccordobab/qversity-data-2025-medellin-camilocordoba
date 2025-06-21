@@ -1,15 +1,14 @@
 {{ config(materialized='table') }}
 
--- Step 1: Load base staging data
+-- Load cleaned customer data from the staging table
 with base as (
     select * from {{ ref('silver_staging_mobile_customers') }}
 ),
 
--- Step 2: Join location dimension using cleaned city and country
+-- Join location dimension using cleaned city and country so that location_id is added
 joined_loc as (
     select
-        b.customer_clean_id,
-        b.original_customer_id,
+        b.customer_id,
         b.first_name,
         b.last_name,
         b.email,
@@ -38,11 +37,10 @@ joined_loc as (
        and b.country = loc.country
 ),
 
--- Step 3: Join device dimension using cleaned device brand and model
+-- Join device dimension using cleaned device brand and model so that device_id is added, and city and country are no longer present
 joined_device as (
     select
-        j.customer_clean_id,
-        j.original_customer_id,
+        j.customer_id,
         j.first_name,
         j.last_name,
         j.email,
@@ -68,10 +66,9 @@ joined_device as (
        and j.device_model = d.device_model
 )
 
--- Final selection: clean, enriched customer profile with foreign keys
+-- device_brand and device_model are no loger present and the table is enriched with foreign keys
 select
-    customer_clean_id,
-    original_customer_id,
+    customer_id,
     first_name,
     last_name,
     email,

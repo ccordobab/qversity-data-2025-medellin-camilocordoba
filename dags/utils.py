@@ -1,6 +1,7 @@
 import requests
+import json
 
-# Esta función toma un valor y lo convierte en un string JSON
+# converts a value into a JSON string
 def serialize_json(value):
     if isinstance(value, (dict,list)):
         try:
@@ -10,7 +11,7 @@ def serialize_json(value):
     else:
         return str(value)
 
-# Esta función hace una solicitud HTTP GET a la URL dada, ademas quita la metadata del objeto response    
+# makes a get http request to a url, waits for the response and takes the data of the reponse object without its metadata    
 def json_from_api(url):
     response = requests.get(url)
     data = response.json()

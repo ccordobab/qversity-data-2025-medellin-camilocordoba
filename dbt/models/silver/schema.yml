@@ -4,7 +4,7 @@ models:
   - name: silver_customers
     description: "Customer data cleaned and deduplicated"
     columns:
-      - name: customer_clean_id
+      - name: customer_id
         tests:
           - not_null
           - unique

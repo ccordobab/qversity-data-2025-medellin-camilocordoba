@@ -1,21 +1,32 @@
 {{ config(materialized='table') }}
 
+
+-- Extract the raw customer data from the bronze table
 with source as (
     select * from public.bronze_mobile_customers
 ),
 
+-- Clean and standardize each field from the source
 cleaned as (
     select
         customer_id,
+
+        -- Capitalize and trim names to improve consistency
         initcap(trim(first_name)) as first_name,
         initcap(trim(last_name)) as last_name,
+
+        -- Lowercase and trim email for consistent filtering/joins
         lower(trim(email)) as email,
+
         trim(phone_number) as phone_number,
+
+        -- Keep only realistic age values, round to nearest integer
         case
             when cast(age as numeric) between 18 and 110 then cast(round(cast(age as numeric), 0) as integer)
             else null
         end as age,
 
+        -- Normalize country names using fuzzy string similarity. to standardize mobile country names, fixing synonyms and typos
         case
             when difference(lower(trim(country)), 'peru') >= 3 then 'peru'
             when difference(lower(trim(country)), 'argentina') >= 3 then 'argentina'
@@ -25,6 +36,7 @@ cleaned as (
             else lower(trim(country))
         end as country,
 
+        -- Similar fuzzy cleaning for city names to standardize city names, fixing synonyms and typos
         case
             when difference(lower(trim(city)), 'cdmx') >= 3 then 'ciudad de mexico'
             when difference(lower(trim(city)), 'ciudad de mexico') >= 3 then 'ciudad de mexico'
@@ -44,7 +56,8 @@ cleaned as (
             when difference(lower(trim(city)), 'barranquilla') >= 3 then 'barranquilla'
             else lower(trim(city))
         end as city,
-
+        
+        -- Standardize operator names with fuzzy matching, fixing synonyms and typos
         case
             when difference(lower(trim(operator)), 'wom') >= 3 then 'wom'
             when difference(lower(trim(operator)), 'claro') >= 3 then 'claro'
@@ -53,6 +66,7 @@ cleaned as (
             else lower(trim(operator))
         end as operator,
 
+        -- Standardize mobile plan types with fuzzy matching, fixing synonyms and typos
         case
             when difference(lower(trim(plan_type)), 'prepago') >= 2 then 'prepago'
             when difference(lower(trim(plan_type)), 'pospago') >= 2 then 'pospago'
@@ -61,8 +75,11 @@ cleaned as (
             else lower(trim(plan_type))
         end as plan_type,
 
+        -- Cast data usage and billing to numeric
         cast(monthly_data_gb as numeric) as monthly_data_gb,
         cast(monthly_bill_usd as numeric) as monthly_bill_usd,
+
+        -- Normalize inconsistent date formats using regex to determine how a given date is written
         case
             when registration_date ~ '^\d{4}-\d{2}-\d{2}$' then to_date(registration_date, 'YYYY-MM-DD')
             when registration_date ~ '^\d{8}$' then to_date(registration_date, 'YYYYMMDD')
@@ -75,8 +92,8 @@ cleaned as (
             end
             else null
         end as registration_date,
-
-
+        
+        -- Standarize account status, handling multilingual and defined values.
         case
             when lower(trim(status)) in ('active', 'activo', 'válido') then 'active'
             when lower(trim(status)) in ('inactive', 'inactivo', 'invalid') then 'inactive'
@@ -84,7 +101,8 @@ cleaned as (
             when trim(status) = '' or status is null then null
             else lower(trim(status))
         end as status,
-
+        
+        -- Standardize devices brand names, fixing synonyms and typos with fuzzy matching
         case
             when difference(lower(trim(device_brand)), 'apple') >= 3 then 'apple'
             when difference(lower(trim(device_brand)), 'samsung') >= 3 then 'samsung'
@@ -106,6 +124,7 @@ cleaned as (
         payment_history,
         current_timestamp as transformation_timestamp
     from source
+    where customer_id is not null
 ),
 
 country_correction as (
@@ -148,32 +167,14 @@ country_correction as (
     from cleaned
 ),
 
-fingerprinted as (
-    select *,
-        -- Fingerprint: clave para identificar registros iguales
-        lower(trim(coalesce(first_name, ''))) || '_' ||
-        lower(trim(coalesce(last_name, ''))) || '_' ||
-        lower(trim(coalesce(email, ''))) || '_' ||
-        lower(trim(coalesce(operator, ''))) || '_' ||
-        lower(trim(coalesce(country, ''))) as fingerprint
-    from country_correction
-),
-
-with_ids as (
-    select *,
-        dense_rank() over (order by fingerprint) as customer_clean_id
-    from fingerprinted
-),
-
 deduplicated as (
-    select distinct on (customer_clean_id) *
-    from with_ids
-    order by customer_clean_id, ingestion_timestamp desc
+    select distinct on (customer_id) *
+    from country_correction
+    order by customer_id, ingestion_timestamp desc
 )
 
 select 
-    customer_clean_id,
-    customer_id as original_customer_id,
+    customer_id,
     first_name,
     last_name,
     email,

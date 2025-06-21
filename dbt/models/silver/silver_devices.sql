@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- Extract unique combinations of device_brand and device_model
 with raw_devices as (
     select
         device_brand,
@@ -9,10 +10,12 @@ with raw_devices as (
     group by device_brand, device_model
 ),
 
+-- Generate a unique key for each device
 with_ids as (
     select *,
         row_number() over (order by device_brand, device_model) as device_id
     from raw_devices
 )
 
+-- Return the final dimension table with device_id, device_brand and device_model
 select * from with_ids
