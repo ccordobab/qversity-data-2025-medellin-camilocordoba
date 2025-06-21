@@ -1,160 +1,64 @@
-# Qversity Project
+# Qversity Data Final Project 2025
 
-A data local data platform using Docker Compose with Airflow, PostgreSQL, dbt, and Python.
+## Overview
 
-## Architecture
+This project implements a complete end-to-end ELT data pipeline using the Medallion Architecture (Bronze, Silver, Gold). The main goal is to integrate the data engineering tools learned during the Qversity training, and extract business insights from a custom dataset.
 
-This project implements a Bronze-Silver-Gold data lakehouse architecture:
+The dataset used is a messy JSON file stored in a public S3 bucket, containing information about mobile service customers. This pipeline ingests the data, transforms it through successive layers, and ultimately provides business-ready tables that answer real-world analytical questions.
 
-- **Bronze Layer**: Raw data ingestion and staging
-- **Silver Layer**: Cleaned and standardized data
-- **Gold Layer**: Business-ready analytics and aggregations
+**Technologies used:**
 
-## Project Structure
+- Docker
+- PostgreSQL
+- Apache Airflow
+- dbt
+- Python
+- Git & GitHub
 
-```
-/
-├── dags/                 # Airflow DAG definitions
-├── dbt/                  # dbt project
-│   ├── models/           # dbt models (bronze, silver, gold)
-│   │   ├── bronze/       # Raw data staging
-│   │   ├── silver/       # Cleaned data
-│   │   └── gold/         # Business analytics
-│   ├── tests/            # dbt tests
-│   ├── dbt_project.yml   # dbt configuration
-│   └── profiles.yml      # Database connections
-├── scripts/              # Setup and utility scripts
-├── data/                 # Data files
-│   ├── raw/              # Raw input data
-│   └── processed/        # Processed output data
-├── logs/                 # Application logs
-├── env.example           # Environment variables template
-├── .gitignore            # Python/SQL gitignore
-├── docker compose.yml    # Docker environment setup
-├── requirements.txt      # Python dependencies
-└── README.md             # This file
-```
+---
+
+## Author
+
+- **Name**: Camilo Cordoba Bedoya
+- **Email**: camilocb204@gmail.com  
+- **City**: Medellín  
+- **Cohort**: Qversity 2025  
+
+---
 
 ## Quick Start
 
-### Prerequisites
-- Docker and Docker Compose installed
-- At least 4GB RAM available
+### Requirements
 
-### Setup
+- Docker & Docker Compose
+- Python 3.11+
+- dbt-postgres
 
-1. **Clone and setup environment**:
-```bash
-# Copy environment template
-cp env.example .env
-```
+---
 
-2. **Manual setup** (alternative):
-```bash
-# Start services
-docker compose up -d
-```
+## Bronze Layer – Raw Ingestion
 
-## Access Points
+### Goal
+Store the raw JSON data as-is from the public S3 bucket, preserving its original structure while adding basic metadata for traceability ("ingestion_timestamp").
 
-- **Airflow UI**: http://localhost:8080 (admin/admin)
-- **PostgreSQL**: localhost:5432 (airflow/airflow)
+### Tools Used
+- **Apache Airflow** for orchestration
+- **Python** for data handling
+- **pandas** for DataFrame processing
+- **SQLAlchemy** for database connectivity
+- **PostgreSQL** as the storage layer
 
-## Common Commands
+### Actions Taken
 
-### Airflow
-```bash
-# View Airflow logs
-docker compose logs -f airflow
+- A Python-based Airflow DAG was created to orchestrate the ingestion process.
+- The DAG downloads the JSON file from the following public S3 endpoint:
+https://qversity-raw-public-data.s3.amazonaws.com/mobile_customers_messy_dataset.json
+- The raw data is parsed into a DataFrame using pandas and stored in PostgreSQL in the table: bronze_mobile_customers
+- An additional column ingestion_timestamp is added to each record to capture the load time.
+- The ingestion task uses to_sql to convert the DataFrame into a PosfgreSQL table.
 
-# Trigger a DAG manually
-docker compose exec airflow airflow dags trigger hello_world_dag
-```
+- To promote clean code and reuse, a dedicated module utils.py was created to hold helper functions for data extraction and serialization.
 
-### dbt
-```bash
-# Enter dbt container
-docker compose exec dbt bash
 
-# Run all models
-dbt run
 
-# Run specific layer
-dbt run --models bronze
-dbt run --models silver
-dbt run --models gold
-
-# Test data quality
-dbt test
-
-# Generate documentation
-dbt docs generate
-dbt docs serve
-```
-
-### Database Access
-```bash
-# Connect to PostgreSQL
-docker compose exec postgres psql -U qversity-admin -d qversity
-
-# View created schemas
-\dn
-
-# View tables in bronze schema
-\dt bronze.*
-```
-
-## Testing
-
-```bash
-# Run dbt tests
-docker compose exec dbt dbt test
-
-# Run specific test
-docker compose exec dbt dbt test --models test_customer_email_validity
-```
-
-## Development
-
-### Adding New DAGs
-1. Create Python files in `dags/`
-2. DAGs will be automatically picked up by Airflow
-
-### Adding dbt Models
-1. Create SQL files in appropriate layer directories:
-   - `dbt/models/bronze/` for raw data
-   - `dbt/models/silver/` for cleaned data
-   - `dbt/models/gold/` for analytics
-
-### Environment Configuration
-- Copy `env.example` to `.env` and customize
-- Modify `docker compose.yml` for additional services
-
-## Monitoring
-
-```bash
-# View all service logs
-docker compose logs -f
-
-# View specific service logs
-docker compose logs -f airflow
-docker compose logs -f dbt
-docker compose logs -f postgres
-
-# Check service status
-docker compose ps
-```
-
-## Cleanup
-
-```bash
-# Stop services
-docker compose down
-
-# Remove volumes (⚠️ deletes all data)
-docker compose down -v
-
-# Remove images
-docker compose down --rmi all
-```
 

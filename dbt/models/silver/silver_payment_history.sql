@@ -4,7 +4,7 @@ with filtered as (
 
     select
         customer_clean_id,
-        payment_history
+        replace(payment_history, '''', '"') as payment_history
     from {{ ref('silver_staging_mobile_customers') }}
     where 
         payment_history ~ '^\[.*\]$' -- solo valores que parecen listas JSON

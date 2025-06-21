@@ -1,7 +1,7 @@
 {{ config(materialized='table') }}
 
 with source as (
-    select * from {{ ref('bronze_raw_mobile_customers') }}
+    select * from public.bronze_mobile_customers
 ),
 
 cleaned as (
@@ -12,7 +12,7 @@ cleaned as (
         lower(trim(email)) as email,
         trim(phone_number) as phone_number,
         case
-            when cast(age as integer) between 18 and 110 then cast(age as integer)
+            when cast(age as numeric) between 18 and 110 then cast(round(cast(age as numeric), 0) as integer)
             else null
         end as age,
 
@@ -101,7 +101,7 @@ cleaned as (
         cast(data_usage_current_month as numeric) as data_usage_current_month,
         cast(latitude as float) as latitude,
         cast(longitude as float) as longitude,
-        credit_score,
+        cast(credit_score as integer) as credit_score,
         ingestion_timestamp,
         payment_history,
         current_timestamp as transformation_timestamp

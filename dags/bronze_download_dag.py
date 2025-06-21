@@ -6,34 +6,28 @@ import requests
 import pandas as pd
 from sqlalchemy import create_engine
 import json
+from utils import serialize_json, json_from_api
 
 URL = "https://qversity-raw-public-data.s3.amazonaws.com/mobile_customers_messy_dataset.json"
-LOCAL_PATH = "/opt/airflow/data/raw/mobile_customers_dataset.json"
 
+# la función definida en utils.py para descargar y convertir el JSON a un objeto de Python. quitandole la metadata del objeto response
+json_data = json_from_api(URL)
 
-def download_from_http():
-    os.makedirs(os.path.dirname(LOCAL_PATH), exist_ok=True)
-    response = requests.get(URL)
-    response.raise_for_status() 
-    with open(LOCAL_PATH, "w") as f:
-        f.write(response.text)
+# Función principal que transforma el JSON a una tabla SQL con un timestamp de ingestión
+def converting_json_to_table_with_timestamp():
 
-def serialize_json(value):
-    if isinstance(value, (dict,list)):
-        try:
-            return json.dumps(value)
-        except Exception:
-            return str(value)
-    else:
-        return str(value)
+    # Convertimos el JSON a un DataFrame de pandas
+    mobile_customer_dataframe = pd.DataFrame(json_data)
 
-def converting_json_to_table():
-    mobile_customer_dataframe = pd.read_json(LOCAL_PATH)
+    # La columna 'payment_history' contiene datos anidados (lista de diccionarios),
+    # por lo tanto la serializamos como string JSON para que pueda guardarse en SQL
     mobile_customer_dataframe['payment_history'] = mobile_customer_dataframe['payment_history'].apply(serialize_json)
     mobile_customer_dataframe['ingestion_timestamp']= datetime.now()
     engine = create_engine("postgresql+psycopg2://qversity-admin:qversity-admin@postgres:5432/qversity")
+
+    # Exportamos el DataFrame a una tabla SQL
     mobile_customer_dataframe.to_sql(
-        name='bronze_raw_mobile_customers',
+        name='bronze_mobile_customers',
         con=engine,
         schema='public',
         if_exists='replace', 
@@ -46,18 +40,14 @@ with DAG(
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False,
-    tags=["bronze", "s3", "raw"],
+    tags=["medallion"],
 ) as dag:
 
-    download_task = PythonOperator(
-        task_id="download_json_from_http",
-        python_callable=download_from_http,
-    )
-
+    # tarea que ejecuta la función de ingestión
     bronze_raw_table_creation_task = PythonOperator(
         task_id = "bronze_raw_table_creation_from_json",
-        python_callable = converting_json_to_table,
+        python_callable = converting_json_to_table_with_timestamp,
     )
 
 
-    download_task >> bronze_raw_table_creation_task
+    bronze_raw_table_creation_task
