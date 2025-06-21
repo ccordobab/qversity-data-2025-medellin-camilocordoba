@@ -25,6 +25,12 @@ joined_loc as (
         b.country,
         b.device_brand,
         b.device_model,
+        b.monthly_data_gb,
+        b.monthly_bill_usd,
+        b.last_payment_date,
+        b.credit_limit,
+        b.data_usage_current_month,
+        b.plan_type,
         loc.location_id
     from base b
     left join {{ ref('silver_locations') }} loc
@@ -49,6 +55,12 @@ joined_device as (
         j.ingestion_timestamp,
         j.transformation_timestamp,
         j.location_id,
+        j.monthly_data_gb,
+        j.monthly_bill_usd,
+        j.last_payment_date,
+        j.credit_limit,
+        j.data_usage_current_month,
+        j.plan_type,
         d.device_id
     from joined_loc j
     left join {{ ref('silver_devices') }} d
@@ -71,6 +83,12 @@ select
     status,
     credit_score,
     operator,
+    monthly_data_gb,
+    monthly_bill_usd,
+    last_payment_date,
+    credit_limit,
+    data_usage_current_month,
+    plan_type,
     ingestion_timestamp,
     transformation_timestamp
 from joined_device
