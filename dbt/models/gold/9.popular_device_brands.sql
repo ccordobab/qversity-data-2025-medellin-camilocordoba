@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What are the most popular device brands?
 select
     d.device_brand,
     count(*) as device_count,

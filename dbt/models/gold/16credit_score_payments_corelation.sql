@@ -1,6 +1,6 @@
 {{ config(materialized='table') }}
 
--- Paso 1: Obtener la media de crédito y proporción de pagos fallidos por cliente
+-- How does credit score correlate with payment behavior?
 
 with payments as (
     select
@@ -45,8 +45,6 @@ joined as (
     left join failed_payments f on c.customer_id = f.customer_id
     join total_payments t on c.customer_id = t.customer_id
 )
-
--- Agrupamos por rangos de crédito para ver correlación
 
 select
     case

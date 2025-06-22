@@ -36,7 +36,7 @@ def converting_json_to_table_with_timestamp():
     engine.dispose()
 
 with DAG(
-    dag_id="download_bronze_silver_gold",
+    dag_id="bronze_silver_gold",
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False,

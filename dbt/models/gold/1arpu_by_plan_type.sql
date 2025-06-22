@@ -1,5 +1,7 @@
 {{ config(materialized='table') }}
 
+-- What is the average revenue per user ARPU) by plan type?
+
 select
     plan_type,
     avg(monthly_bill_usd) as arpu,

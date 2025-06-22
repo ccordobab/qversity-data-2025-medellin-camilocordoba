@@ -48,7 +48,7 @@ final as (
         payment_entry ->> 'status' as status,
         -- Extract 'amount' and cast to numeric (after ensuring it's not an empty string)
         cast(nullif(payment_entry ->> 'amount', '') as numeric) as amount,
-        current_timestamp as created_at
+        current_timestamp as processed_at
     from exploded
     -- Ensure the JSON entry has all expected fields
     where 

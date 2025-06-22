@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- What percentage of customers have payment issues?
 
 with all_customers as (
     select distinct customer_id

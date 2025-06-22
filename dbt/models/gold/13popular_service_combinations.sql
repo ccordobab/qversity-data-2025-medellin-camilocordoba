@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What service combinations are most popular?
 select
     sg.service_group_id,
     string_agg(distinct s.service, ', ' order by s.service) as service_combination,

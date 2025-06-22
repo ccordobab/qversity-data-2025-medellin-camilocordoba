@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What is device brand preference by plan type?
 select
     d.device_brand,
     c.plan_type,

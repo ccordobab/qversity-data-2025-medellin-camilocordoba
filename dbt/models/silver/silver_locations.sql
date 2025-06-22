@@ -18,4 +18,4 @@ with_ids as (
 )
 
 -- Return the final dimension table with location_id, city and country
-select * from with_ids
+select *, current_timestamp as processed_at from with_ids

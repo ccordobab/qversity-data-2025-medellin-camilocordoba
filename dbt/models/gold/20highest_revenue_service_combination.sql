@@ -1,6 +1,6 @@
 {{ config(materialized='table') }}
 
--- Paso 1: Clientes con su combinación de servicios y su facturación
+-- Which service combinations drive highest revenue?
 
 with base as (
     select
@@ -12,8 +12,6 @@ with base as (
         on mcs.customer_id = p.customer_id
     where p.monthly_bill_usd is not null
 ),
-
--- Paso 2: Agregamos el revenue por grupo de servicios
 
 grouped as (
     select

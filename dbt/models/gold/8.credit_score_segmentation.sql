@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What is customer segmentation by credit score ranges?
 select
     case
         when credit_score < 400 then 'less than 400'

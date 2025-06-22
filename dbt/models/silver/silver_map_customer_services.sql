@@ -56,7 +56,9 @@ mapped as (
 select
     customer_id,
     service_group_id,
-    service_ids_str  -- for validation/debugging, remove in production if needed
+    service_ids_str,
+    current_timestamp as processed_at
+
 from mapped
 order by customer_id
 

@@ -56,7 +56,8 @@ unnested as (
 select
     u.service_group_id,
     u.service_id,
-    s.service
+    s.service,
+    current_timestamp as processed_at
 from unnested u
 join {{ ref('silver_services') }} s
     on u.service_id = s.service_id

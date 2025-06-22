@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What is device brand preference by country/operator?
 select
     d.device_brand,
     l.country,

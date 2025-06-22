@@ -6,6 +6,8 @@ This project implements a complete end-to-end ELT data pipeline using the Medall
 
 The dataset used is a messy JSON file stored in a public S3 bucket, containing information about mobile service customers. This pipeline ingests the data, transforms it through successive layers, and ultimately provides business-ready tables that answer real-world analytical questions.
 
+At the end of this readme file there are the **key business questions answered in the Gold Layer**, each linked to its corresponding dbt model
+
 **Technologies used:**
 
 - Docker
@@ -13,7 +15,6 @@ The dataset used is a messy JSON file stored in a public S3 bucket, containing i
 - Apache Airflow
 - dbt
 - Python
-- Git & GitHub
 
 ---
 
@@ -34,12 +35,13 @@ The dataset used is a messy JSON file stored in a public S3 bucket, containing i
 ```bash
 git clone https://github.com/ccordobab/qversity-data-2025-medellin-camilocordoba.git
 cd qversity-data-2025-medellin-camilocordoba
+```
 
 ### 2. Clone and setup environment:
 ```bash
 # Copy environment template
 cp env.example .env
-
+```
 ### 3. Start Docker Containers
 
 This project uses docker-compose to run:
@@ -52,14 +54,31 @@ Start all containers:
 
 ```bash
 docker compose up --build -d
-
+```
 ### Requirements
 
 - Docker & Docker Compose
 - Python 3.11+
 - dbt-postgres
 
+### Access Points
+Airflow UI: http://localhost:8080 (admin/admin)
+PostgreSQL: localhost:5432 (airflow/airflow)
+### Parametro de conexion a posgres
+Username: qversity-admin
+Password: qversity-admin
+Base de datos: qversity
+Servidor: localhost
+Puerto: 5432
 ---
+## Run pipeline
+**1. Run Environment** 
+```bash
+docker compose up -d
+```
+**2. trigger dag** Open Airflow at localhost:8080, trigger the bronze_silver_gold DAG manually
+---
+
 
 ## Bronze Layer – Raw Ingestion
 

@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+--What is the age distribution by country and operator?
 select
     c.age,
     l.country,

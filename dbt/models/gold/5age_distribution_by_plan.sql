@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What is the age distribution of customers by plan type?
 select
     age,
     plan_type,

@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- How does the distribution of new customers change over time?
 select
     date_trunc('month', registration_date) as month,
     count(*) as new_customers,

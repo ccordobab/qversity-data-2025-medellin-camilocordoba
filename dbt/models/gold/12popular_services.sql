@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- Which services are most commonly contracted?
 select
     s.service,
     count(distinct mcs.customer_id) as total_customers,

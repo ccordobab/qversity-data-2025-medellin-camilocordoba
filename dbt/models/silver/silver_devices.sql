@@ -18,4 +18,4 @@ with_ids as (
 )
 
 -- Return the final dimension table with device_id, device_brand and device_model
-select * from with_ids
+select * , current_timestamp as processed_at from with_ids

@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- What are customer acquisition trends by operator?
 select
     date_trunc('month', c.registration_date) as month,
     c.operator,

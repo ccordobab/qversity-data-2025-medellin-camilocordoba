@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- How do the mean and median monthly revenues per user compare across different plan types and operators?
 with stats as (
     select
         plan_type,

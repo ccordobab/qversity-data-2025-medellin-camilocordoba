@@ -1,4 +1,5 @@
 {{ config(materialized='table') }}
+-- Which customer segments generate the highest revenue?
 
 with base as (
     select

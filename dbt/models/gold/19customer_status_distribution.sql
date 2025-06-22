@@ -1,5 +1,7 @@
 {{ config(materialized='table') }}
 
+--What percentage of customers are active/suspended/inactive?
+
 with total as (
     select count(*) as total_customers
     from {{ ref('silver_customers') }}

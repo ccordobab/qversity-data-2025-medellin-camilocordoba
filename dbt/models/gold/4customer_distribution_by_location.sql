@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+--What is the distribution of customers by location?
 select
     l.country,
     l.city,

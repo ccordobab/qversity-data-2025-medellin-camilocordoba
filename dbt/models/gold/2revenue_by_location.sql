@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- What is the revenue distribution by geographic location?
 
 select
     l.country,

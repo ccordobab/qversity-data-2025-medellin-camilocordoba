@@ -1,5 +1,5 @@
 {{ config(materialized='table') }}
-
+-- How are customers distributed across different operators?
 select
     operator,
     count(*) as customer_count,

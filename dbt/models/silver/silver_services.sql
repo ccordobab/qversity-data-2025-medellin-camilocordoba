@@ -24,6 +24,7 @@ cleaned as (
 -- Assign a unique ID to each service
 select
     row_number() over (order by service) as service_id,
-    service
+    service,
+    current_timestamp as processed_at
 from cleaned
 
