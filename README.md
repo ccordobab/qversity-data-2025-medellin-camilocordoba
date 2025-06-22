@@ -121,6 +121,14 @@ docker compose up -d
 Open Airflow at localhost:8080, trigger the bronze_silver_gold DAG manually
 
 ---
+## Run tests
+
+```bash
+cd qversity-data-2025-medellin-camilocordoba
+docker compose exec dbt bash
+dbt test
+```
+---
 
 
 ## Bronze Layer – Raw Ingestion
@@ -398,6 +406,7 @@ This approach ensures separation of concerns, reusability, and clear lineage bet
 ## Business Questions and Corresponding SQL Models
 
 Below are the key business questions answered in the Gold Layer, each linked to its corresponding dbt model:
+some of the following images only show part of the data of the table. Some rows may be hidden to fit the screenshot.
 
 - [What is the average revenue per user (ARPU) by plan type?](gold/arpu_by_plan_type.sql)
 

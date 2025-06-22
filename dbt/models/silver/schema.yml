@@ -2,33 +2,99 @@ version: 2
 
 models:
   - name: silver_customers
-    description: "Customer data cleaned and deduplicated"
+    description: >
+      Fact table containing enriched and cleaned customer data. Includes
+      validated fields and references to location and device dimensions.
     columns:
       - name: customer_id
+        description: Unique identifier for each customer.
         tests:
           - not_null
           - unique
+      - name: device_id
+        description: Foreign key referencing the device dimension.
+      - name: location_id
+        description: Foreign key referencing the location dimension.
+      - name: plan_type
+        description: Cleaned and normalized customer plan type.
+      - name: age
+        description: Validated and standardized customer age.
+      - name: monthly_bill_usd
+        description: Monthly billing amount in USD.
 
   - name: silver_devices
-    description: "devices data clean"
+    description: >
+      Dimension table with distinct device brand and model combinations.
+      Assigns a device_id for normalization.
     columns:
       - name: device_id
+        description: Unique identifier for each device.
         tests:
           - not_null
           - unique
+      - name: device_brand
+        description: Cleaned brand of the device.
+      - name: device_model
+        description: Cleaned model of the device.
 
   - name: silver_locations
-    description: "location data clean"
+    description: >
+      Dimension table with unique city-country pairs, used for geographic analysis.
     columns:
       - name: location_id
+        description: Unique identifier for each location.
         tests:
           - not_null
           - unique
+      - name: city
+        description: Cleaned city name.
+      - name: country
+        description: Cleaned and corrected country name.
 
   - name: silver_services
-    description: "unique services"
+    description: >
+      Dimension table containing unique individual services extracted
+      from raw contracted_services field.
     columns:
       - name: service_id
+        description: Unique identifier for each service.
         tests:
           - not_null
           - unique
+      - name: service
+        description: Standardized name of the contracted service.
+
+  - name: silver_service_groups
+    description: >
+      Table identifying unique combinations of services contracted by customers.
+      Each group is assigned a service_group_id.
+    columns:
+      - name: service_group_id
+        description: Unique identifier for each combination of services.
+      - name: service_id
+        description: Foreign key referencing the service dimension.
+
+  - name: silver_map_customer_services
+    description: >
+      Maps each customer to a service group based on the services they have contracted.
+    columns:
+      - name: customer_id
+        description: Customer identifier.
+      - name: service_group_id
+        description: Foreign key referencing the group of services contracted.
+      - name: service_ids_str
+        description: Stringified list of service IDs for debugging and traceability.
+
+  - name: silver_payment_history
+    description: >
+      Exploded and normalized customer payment history from embedded JSON-like strings.
+    columns:
+      - name: customer_id
+        description: Customer identifier.
+      - name: payment_date
+        description: Date of the payment.
+      - name: payment_status
+        description: Status of the payment (e.g. paid, missed).
+      - name: payment_amount
+        description: Amount of the payment in USD.
+
