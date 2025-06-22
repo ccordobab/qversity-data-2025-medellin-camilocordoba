@@ -69,13 +69,13 @@ PostgreSQL: localhost:5432 (airflow/airflow)
 
 ### postgreSQL connection parameters
 
-Username: qversity-admin
-Password: qversity-admin
-Base de datos: qversity
-Servidor: localhost
-Puerto: 5432
+-Username: qversity-admin
+-Password: qversity-admin
+-Base de datos: qversity
+-Servidor: localhost
+-Puerto: 5432
 
-#### What to Expect in PostgreSQL After the Pipeline Runs
+### What to Expect in PostgreSQL After the Pipeline Runs
 
 to see what schemas there are enter the following comands 
 
@@ -106,16 +106,20 @@ to access the public_gold schema enter the following command
 \dt public_gold.*
 ```
 
-and you  will get something like this, with all the tables of the public_gold schema for demonstration purposes all the tables of the schema are not included in the following screeshot.
+and you  will get something like this. the image is of the actual public_gold schema but all the tables did not fit in the screeshot.
+
+
 ![public_gold schema](images/public_gold.png)
 ---
 ## Run pipeline
-**1. Run Environment** 
+#### 1. Run Environment
 ```bash
 docker compose up -d
 ```
-**2. trigger dag** 
+#### 2. trigger dag
+
 Open Airflow at localhost:8080, trigger the bronze_silver_gold DAG manually
+
 ---
 
 
@@ -396,26 +400,92 @@ This approach ensures separation of concerns, reusability, and clear lineage bet
 Below are the key business questions answered in the Gold Layer, each linked to its corresponding dbt model:
 
 - [What is the average revenue per user (ARPU) by plan type?](gold/arpu_by_plan_type.sql)
+
+![arpu_by_plan_type](images/arpu_by_plan_type.png)
+
 - [What is the revenue distribution by geographic location?](gold/revenue_by_location.sql)
+
+![revenue_by_location](images/revenue_by_location.png)
+
 - [Which customer segments generate the highest revenue?](gold/revenue_by_age_segment.sql)
+
+the segmentation was done by age
+
+![highest_revenue_segment](images/highest_revenue_segment.png)
+
 - [What is the distribution of customers by location?](gold/customer_distribution_by_location.sql)
+
+![customer_distribution_by_location](images/customer_distribution_by_location.png)
+
 - [What is the age distribution of customers by plan type?](gold/age_distribution_by_plan.sql)
+
+![age_distribution_by_plan](images/age_distribution_by_plan.png)
+
 - [What is the age distribution by country and operator?](gold/age_distribution_by_country_operator.sql)
+
+![age_distribution_by_country_operator](images/age_distribution_by_country_operator.png)
+
 - [How are customers distributed across different operators?](gold/distribution_by_operator.sql)
+
+![distribution_by_operator](images/distribution_by_operator.png)
+
+
 - [What is customer segmentation by credit score ranges?](gold/credit_score_segmentation.sql)
+
+![credit_score_segmentation](images/credit_score_segmentation.png)
+
 - [What are the most popular device brands?](gold/popular_device_brands.sql)
+
+![popular_device_brands](images/popular_device_brands.png)
+
+
 - [What is device brand preference by country/operator?](gold/device_brand_preference_by_country_operator.sql)
+
+![device_brand_preference_by_country_operator](images/device_brand_preference_by_country_operator.png)
+
 - [What is device brand preference by plan type?](gold/device_preference_by_plan_type.sql)
+
+![device_preference_by_plan_type](images/device_preference_by_plan_type.png)
+
 - [Which services are most commonly contracted?](gold/popular_services.sql)
+
+![popular_services](images/popular_services.png)
+
 - [What service combinations are most popular?](gold/popular_service_combinations.sql)
+
+![popular_service_combinations](images/popular_service_combinations.png)
+
 - [What percentage of customers have payment issues?](gold/payment_issues_percentage.sql)
+
+![payment_issues_percentage](images/payment_issues_percentage.png)
+
 - [Which customers have pending payments?](gold/customers_with_pending_payments.sql)
+
+![customers_with_pending_payments](images/customers_with_pending_payments.png)
+
 - [How does credit score correlate with payment behavior?](gold/credit_score_payments_corelation.sql)
+
+![credit_score_payments_corelation](images/credit_score_payments_corelation.png)
+
 - [How does the distribution of new customers change over time?](gold/new_customers_over_time.sql)
+
+![new_customers_over_time](images/new_customers_over_time.png)
+
 - [What are customer acquisition trends by operator?](gold/customer_acquisition_by_operator.sql)
+
+![customer_acquisition_by_operator](images/customer_acquisition_by_operator.png)
+
 - [What percentage of customers are active/suspended/inactive?](gold/customer_status_distribution.sql)
+
+![customer_status_distribution](images/customer_status_distribution.png)
+
 - [Which service combinations drive highest revenue?](gold/highest_revenue_by_service_combination.sql)
+
+![highest_revenue_by_service_combination](images/highest_revenue_by_service_combination.png)
+
 - [How do the mean and median monthly revenues per user compare across different plan types and operators?](gold/mean_median_revenue_comparison.sql)
+
+![mean_median_revenue_comparison](images/mean_median_revenue_comparison.png)
 
 ---
 
