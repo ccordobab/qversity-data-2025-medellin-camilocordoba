@@ -62,21 +62,60 @@ docker compose up --build -d
 - dbt-postgres
 
 ### Access Points
+
 Airflow UI: http://localhost:8080 (admin/admin)
+
 PostgreSQL: localhost:5432 (airflow/airflow)
-### Parametro de conexion a posgres
+
+### postgreSQL connection parameters
+
 Username: qversity-admin
 Password: qversity-admin
 Base de datos: qversity
 Servidor: localhost
 Puerto: 5432
+
+#### What to Expect in PostgreSQL After the Pipeline Runs
+
+to see what schemas there are enter the following comands 
+
+```bash
+cd qversity-data-2025-medellin-camilocordoba
+docker compose exec postgres psql -U qversity-admin -d qversity
+\dn
+```
+after running those commmands, you will get the list of schemas.
+
+![list of schemas](images/schemas.png)
+ 
+to access the bronze table you will need to enter to the public schema and find the bronze_mobile_customers table 
+```bash
+\dt public.*
+```
+![public schema](images/public.png)
+
+
+to access the public_silver schema enter the following command
+```bash
+\dt public_silver.*
+```
+![public_silver schema](images/public_silver.png)
+
+to access the public_gold schema enter the following command
+```bash
+\dt public_gold.*
+```
+
+and you  will get something like this, with all the tables of the public_gold schema for demonstration purposes all the tables of the schema are not included in the following screeshot.
+![public_gold schema](images/public_gold.png)
 ---
 ## Run pipeline
 **1. Run Environment** 
 ```bash
 docker compose up -d
 ```
-**2. trigger dag** Open Airflow at localhost:8080, trigger the bronze_silver_gold DAG manually
+**2. trigger dag** 
+Open Airflow at localhost:8080, trigger the bronze_silver_gold DAG manually
 ---
 
 
@@ -106,7 +145,7 @@ Additionals
 
 ---
 
-### Silver Layer – Detailed Data Cleaning and Standardization
+## Silver Layer – Detailed Data Cleaning and Standardization
 
 #### Model: `silver_staging_mobile_customers.sql`
 
@@ -182,13 +221,14 @@ This Silver model results in a high-quality dataset with:
 - Removal of duplicates and noisy data
 - Timestamps for traceability
 
-As part of the Silver layer, the goal is not only to clean the data (handled in `silver_staging_mobile_customers.sql`) but also to normalize the dataset into well-structured dimension and fact tables. This improves analytical performance, reduces redundancy, and prepares the data for complex joins and business logic in the Gold layer.
 
 ## ENTITY RELATIONSHIP DIAGRAM
 
+As part of the Silver layer, the goal is not only to clean the data (handled in `silver_staging_mobile_customers.sql`) but also to normalize the dataset into well-structured dimension and fact tables. This improves analytical performance, reduces redundancy, and prepares the data for complex joins and business logic in the Gold layer.
+
 ![mobile_customer ERD](images/ERD.png)
 
-
+## here is what was done inside the silver layer tables
 
 ### `silver_device.sql`
 
