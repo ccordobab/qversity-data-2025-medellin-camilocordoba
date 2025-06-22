@@ -416,7 +416,7 @@ some of the following images only show part of the data of the table. Some rows 
 
 ![revenue_by_location](images/revenue_by_location.png)
 
-- [Which customer segments generate the highest revenue?](dbt/models/gold/revenue_by_age_segment.sql)
+- [Which customer segments generate the highest revenue?](dbt/models/gold/highest_revenue_segment.sql)
 
 the segmentation was done by age
 
@@ -452,7 +452,7 @@ the segmentation was done by age
 
 ![device_brand_preference_by_country_operator](images/device_brand_preference_by_country_operator.png)
 
-- [What is device brand preference by plan type?](dbt/models/gold/device_preference_by_plan_type.sql)
+- [What is device brand preference by plan type?](dbt/models/gold/device_brand_preference_by_plan_type.sql)
 
 ![device_preference_by_plan_type](images/device_preference_by_plan_type.png)
 
@@ -488,7 +488,7 @@ the segmentation was done by age
 
 ![customer_status_distribution](images/customer_status_distribution.png)
 
-- [Which service combinations drive highest revenue?](dbt/models/gold/highest_revenue_by_service_combination.sql)
+- [Which service combinations drive highest revenue?](dbt/models/gold/highest_revenue_service_combination.sql)
 
 ![highest_revenue_by_service_combination](images/highest_revenue_by_service_combination.png)
 
