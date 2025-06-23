@@ -497,8 +497,15 @@ the segmentation was done by age
 ![mean_median_revenue_comparison](images/mean_median_revenue_comparison.png)
 
 ---
+## Key Insights
 
-
+- The top service is international calling, slightly surpassing even core services like data and voice.
+- The average revenues per customer ARPU variance is minimal less than $2 USD across all three plan types.
+- Contrary to expectations, prepaid customers the ones with the plan_type column (prepago) generate the highest average revenue.
+- All five major services have similar adoption levels. Users expect fully bundled service plans.
+- Colombia dominates with the top 4 cities accounting for more than 2,580 customers, indicating it as the primary market.
+- The distribution of customers across all four major operators is extremely balanced, with a maximum difference of 77 customers between the top and bottom.
+- The top four brands (Samsung, Xiaomi, Huawei, and Apple) are nearly equally popular, each with around 1,175–1,190 users.
 
 
 
